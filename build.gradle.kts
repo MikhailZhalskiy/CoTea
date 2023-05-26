@@ -13,6 +13,6 @@ plugins {
 //        mavenCentral()
 //    }
 //
-//    group = "com.mw.cotea"
+//    group = "com.github.MikhailZhalskiy"
 //    version = "0.1"
 //}

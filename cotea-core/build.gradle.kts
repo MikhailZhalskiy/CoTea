@@ -21,7 +21,7 @@ dependencies {
 publishing {
     publications {
         create<MavenPublication>("maven") {
-            groupId = "om.github.MikhailZhalskiy"
+            groupId = "com.github.MikhailZhalskiy"
             artifactId = "cotea-core"
             version = "0.1"
 
