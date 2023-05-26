@@ -23,4 +23,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "CoTea"
 include(":sample")
-include(":cotea-core")
+include(":cotea")
