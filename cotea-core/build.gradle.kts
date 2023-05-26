@@ -8,10 +8,10 @@ plugins {
 //    `maven-publish`
 //}
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_19
-    targetCompatibility = JavaVersion.VERSION_19
-}
+//java {
+//    sourceCompatibility = JavaVersion.VERSION_17
+//    targetCompatibility = JavaVersion.VERSION_17
+//}
 
 dependencies {
     implementation(libs.coroutines)
@@ -20,7 +20,7 @@ dependencies {
 publishing {
     publications {
         create<MavenPublication>("maven") {
-            groupId = "com.mw.cotea"
+            groupId = "om.github.MikhailZhalskiy"
             artifactId = "cotea-core"
             version = "0.1"
 
