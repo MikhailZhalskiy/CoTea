@@ -1,0 +1,27 @@
+# Versions
+#-----------------
+[versions]
+jdkVersion = "8"
+kotlin = "1.8.20"
+coroutines = "1.7.1"
+mockk = "1.13.5"
+junit5 = "5.9.3"
+
+#-----------------
+# Libraries
+#-----------------
+[libraries]
+# Common libraries
+coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
+
+# Test libraries
+test-junit5 = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit5"}
+test-kotlin = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
+test-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
+test-mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
+
+#-----------------
+# Plugins
+#-----------------
+[plugins]
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }

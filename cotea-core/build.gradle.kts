@@ -1,10 +1,12 @@
 plugins {
-    id("java-library")
-    id("org.jetbrains.kotlin.jvm")
+    alias(libs.plugins.kotlin.jvm)
     `maven-publish`
-    // For build.gradle.kts (Kotlin DSL)
-//    kotlin("jvm") version "1.8.20"
 }
+//plugins {
+//    id("java-library")
+//    id("org.jetbrains.kotlin.jvm")
+//    `maven-publish`
+//}
 
 java {
     sourceCompatibility = JavaVersion.VERSION_17
@@ -12,13 +14,13 @@ java {
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
+    implementation(libs.coroutines)
 }
 
 publishing {
     publications {
         create<MavenPublication>("maven") {
-            groupId = "dev.mw.zhalskiy.cotea-core"
+            groupId = "com.mw.cotea"
             artifactId = "cotea-core"
             version = "0.1"
 
