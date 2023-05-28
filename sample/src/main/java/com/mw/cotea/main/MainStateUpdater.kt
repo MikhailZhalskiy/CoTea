@@ -6,20 +6,20 @@ import com.mw.cotea_core.state_updater.Update
 class MainStateUpdater: StateUpdater<MainMessage, MainState, MainSideEffect, MainCommand> {
 
     override fun update(
-        event: MainMessage,
-        state: MainState
+        state: MainState,
+        message: MainMessage
     ): Update<MainState, MainSideEffect, MainCommand> {
-        return when(event) {
-            is MainMessage.OneClick -> reduceOneClick(event, state)
-            is MainMessage.TwoClick -> reduceTwoClick(event, state)
-            is MainMessage.LoadedOneClick -> reduceLoadedOneClick(event, state)
-            is MainMessage.LoadedTwoClick -> reduceLoadedTwoClick(event, state)
+        return when(message) {
+            is MainMessage.OneClick -> reduceOneClick(state, message)
+            is MainMessage.TwoClick -> reduceTwoClick(state, message)
+            is MainMessage.LoadedOneClick -> reduceLoadedOneClick(state, message)
+            is MainMessage.LoadedTwoClick -> reduceLoadedTwoClick(state, message)
         }
     }
 
     private fun reduceOneClick(
-        event: MainMessage.OneClick,
-        state: MainState
+        state: MainState,
+        message: MainMessage.OneClick
     ): Update<MainState, MainSideEffect, MainCommand> {
         return Update.stateWithSideEffectsWithCommands(
             state = state.copy(countOneClick = state.countOneClick + 1),
@@ -28,8 +28,8 @@ class MainStateUpdater: StateUpdater<MainMessage, MainState, MainSideEffect, Mai
     }
 
     private fun reduceTwoClick(
-        event: MainMessage.TwoClick,
-        state: MainState
+        state: MainState,
+        message: MainMessage.TwoClick
     ): Update<MainState, MainSideEffect, MainCommand> {
         return Update.stateWithSideEffectsWithCommands(
             state = state.copy(countTwoClick = state.countTwoClick + 1),
@@ -38,17 +38,17 @@ class MainStateUpdater: StateUpdater<MainMessage, MainState, MainSideEffect, Mai
     }
 
     private fun reduceLoadedOneClick(
-        event: MainMessage.LoadedOneClick,
-        state: MainState
+        state: MainState,
+        message: MainMessage.LoadedOneClick
     ): Update<MainState, MainSideEffect, MainCommand> {
-        return Update.state(state.copy(one = event.one))
+        return Update.state(state.copy(one = message.one))
     }
 
     private fun reduceLoadedTwoClick(
-        event: MainMessage.LoadedTwoClick,
-        state: MainState
+        state: MainState,
+        message: MainMessage.LoadedTwoClick
     ): Update<MainState, MainSideEffect, MainCommand> {
-        return Update.state(state.copy(two = event.two))
+        return Update.state(state.copy(two = message.two))
     }
 
 
