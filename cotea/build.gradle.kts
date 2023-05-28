@@ -17,7 +17,7 @@ publishing {
     publications {
         create<MavenPublication>("maven") {
             groupId = "com.github.MikhailZhalskiy"
-            artifactId = "cotea-core"
+            artifactId = "cotea"
             version = "0.1"
 
             from(components["kotlin"])

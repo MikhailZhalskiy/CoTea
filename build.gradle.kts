@@ -7,12 +7,3 @@ plugins {
 
     `maven-publish`
 }
-
-//allprojects {
-//    repositories {
-//        mavenCentral()
-//    }
-//
-//    group = "com.github.MikhailZhalskiy"
-//    version = "0.1"
-//}
