@@ -21,11 +21,11 @@ class StateMachine<Message, State, SideEffect, Command>(
     private val transitionSharedFlow = MutableSharedFlow<Transition<Message, State>>(extraBufferCapacity = Int.MAX_VALUE)
 
     fun getStateSource(messageSource: Flow<Message>): Flow<State> {
-        return messageSource.scan(initialState) { state, Message ->
-            val (newState, effects, commands) = stateUpdater.update(Message, state)
+        return messageSource.scan(initialState) { state, message ->
+            val (newState, effects, commands) = stateUpdater.update(state, message)
             commands?.let { commandsSharedFlow.emit(it) }
             effects?.let { sideEffectsSharedFlow.emit(it) }
-            sendTransition(Message, state, newState)
+            sendTransition(state, message, newState)
             newState ?: state
         }
             .distinctUntilChanged { oldState, newState -> oldState === newState }
@@ -51,8 +51,8 @@ class StateMachine<Message, State, SideEffect, Command>(
         commandsSharedFlow.emit(initialCommands)
     }
 
-    private suspend fun sendTransition(message: Message, state: State, newState: State?) {
-        val transition = Transition(message, state, newState ?: state)
+    private suspend fun sendTransition(state: State, message: Message, newState: State?) {
+        val transition = Transition(state, message, newState ?: state)
         transitionSharedFlow.emit(transition)
     }
 }

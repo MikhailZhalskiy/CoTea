@@ -13,7 +13,11 @@ data class Update<State, SideEffect, Command> internal constructor(
 
         fun <State, SideEffect, Command> sideEffects(vararg sideEffects: SideEffect) = Update<State, SideEffect, Command>(state = null, sideEffects = sideEffects.ifEmpty { null }?.toList(), commands = null)
 
+        fun <State, SideEffect, Command> sideEffects(sideEffects: List<SideEffect>) = Update<State, SideEffect, Command>(state = null, sideEffects = sideEffects, commands = null)
+
         fun <State, SideEffect, Command> commands(vararg commands: Command) = Update<State, SideEffect, Command>(state = null, sideEffects = null, commands = commands.ifEmpty { null }?.toList())
+
+        fun <State, SideEffect, Command> commands(commands: List<Command>) = Update<State, SideEffect, Command>(state = null, sideEffects = null, commands = commands)
 
         fun <State, SideEffect, Command> stateWithSideEffectsWithCommands(state: State? = null, sideEffects: List<SideEffect>? = null, commands: List<Command>? = null) = Update(state = state, sideEffects = sideEffects, commands = commands)
 

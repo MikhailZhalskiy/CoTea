@@ -3,8 +3,10 @@ pluginManagement {
         google()
         mavenCentral()
         gradlePluginPortal()
+        maven(url = "https://jitpack.io")
     }
 }
+
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
@@ -15,4 +17,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "CoTea"
 include(":sample")
-include(":cotea-core")
+include(":cotea")

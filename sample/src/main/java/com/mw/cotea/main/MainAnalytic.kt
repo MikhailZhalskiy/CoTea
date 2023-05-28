@@ -7,8 +7,8 @@ import com.mw.cotea_core.transition.TransitionListener
 class MainAnalytic: TransitionListener<MainMessage, MainState> {
 
     override fun onTransition(transition: Transition<MainMessage, MainState>) {
-        println("MainAnalytic oldState: ${transition.oldState}")
-        println("MainAnalytic event: ${transition.event}")
+        println("MainAnalytic state: ${transition.state}")
+        println("MainAnalytic message: ${transition.message}")
         println("MainAnalytic newState: ${transition.newState}")
     }
 }
