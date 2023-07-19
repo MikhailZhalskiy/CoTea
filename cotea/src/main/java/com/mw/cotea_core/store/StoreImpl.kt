@@ -15,7 +15,7 @@ internal class StoreImpl<Message, State, SideEffect, Command>(
     private val stateMachine: StateMachine<Message, State, SideEffect, Command>,
     private val commandHandler: CommandHandler<Message, Command>,
     private val initialCommands: List<Command>,
-    private val transitionListener: TransitionListener<Message, State>? = null
+    private val transitionListener: TransitionListener<Message, State, SideEffect, Command>? = null
 ): Store<Message, State, SideEffect, Command> {
 
     private val messageSharedFlow = MutableSharedFlow<Message>()

@@ -1,10 +1,21 @@
 package com.mw.cotea_core.state_updater
 
-data class Update<State, SideEffect, Command> internal constructor(
+class Update<State, SideEffect, Command> internal constructor(
     val state: State?,
     val sideEffects: List<SideEffect>?,
     val commands: List<Command>?
 ) {
+    operator fun component1(): State? {
+        return state
+    }
+
+    operator fun component2(): List<SideEffect>? {
+        return sideEffects
+    }
+
+    operator fun component3(): List<Command>? {
+        return commands
+    }
 
     companion object {
         fun <State, SideEffect, Command> nothing(): Update<State, SideEffect, Command> = Update(null, null, null)
