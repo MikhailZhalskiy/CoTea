@@ -11,6 +11,22 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapMerge
 import kotlinx.coroutines.flow.scan
 
+/**
+ * Стейт-машина связывающая логику [StateUpdater] и передачу данных по каналам
+ * для команд и сайд-эффектов и нового состояния [State].
+ *
+ * Реагирует на внешние события [Message] приходящие через [messageSource] в методе [getStateSource],
+ * результатом реакции на событие будет новое состояние проброшенное дальше по flow
+ * набор сайд-эффектов брошенных в [sideEffectsSharedFlow].
+ * набор команд брошенных в [commandsSharedFlow].
+ * через канал [transitionSharedFlow] будет проброшен [Transition]
+ * Если состояние не изменилось или в результате реакции на событие не было создано никаких сайд-эффектов
+ * и/или команд то соостветвующие источники ничего не излучают.
+ *
+ * @property sideEffectsSharedFlow наблюдаемый источник излучаемых сайд-эффектов
+ * @property commandsSharedFlow наблюдаемый источник излучаемых команд
+ * @property transitionSharedFlow наблюдаемый источник излучаемых [Transition]
+ */
 class StateMachine<Message, State, SideEffect, Command>(
     private val stateUpdater: StateUpdater<Message, State, SideEffect, Command>,
     private val initialState: State,
@@ -18,15 +34,15 @@ class StateMachine<Message, State, SideEffect, Command>(
 
     private val commandsSharedFlow = MutableSharedFlow<List<Command>>()
     private val sideEffectsSharedFlow = MutableSharedFlow<List<SideEffect>>()
-    private val transitionSharedFlow = MutableSharedFlow<Transition<Message, State>>(extraBufferCapacity = Int.MAX_VALUE)
+    private val transitionSharedFlow = MutableSharedFlow<Transition<Message, State, SideEffect, Command>>(extraBufferCapacity = Int.MAX_VALUE)
 
     fun getStateSource(messageSource: Flow<Message>): Flow<State> {
         return messageSource.scan(initialState) { state, message ->
-            val (newState, effects, commands) = stateUpdater.update(state, message)
+            val (updatedState, sideEffects, commands) = stateUpdater.update(state, message)
             commands?.let { commandsSharedFlow.emit(it) }
-            effects?.let { sideEffectsSharedFlow.emit(it) }
-            sendTransition(state, message, newState)
-            newState ?: state
+            sideEffects?.let { sideEffectsSharedFlow.emit(it) }
+            sendTransition(state, message, updatedState, sideEffects, commands)
+            updatedState ?: state
         }
             .distinctUntilChanged { oldState, newState -> oldState === newState }
     }
@@ -43,7 +59,7 @@ class StateMachine<Message, State, SideEffect, Command>(
             .flatMapMerge { it.asFlow().cancellable() }
     }
 
-    fun getTransitionSource(): Flow<Transition<Message, State>> {
+    fun getTransitionSource(): Flow<Transition<Message, State, SideEffect, Command>> {
         return transitionSharedFlow
     }
 
@@ -51,8 +67,14 @@ class StateMachine<Message, State, SideEffect, Command>(
         commandsSharedFlow.emit(initialCommands)
     }
 
-    private suspend fun sendTransition(state: State, message: Message, newState: State?) {
-        val transition = Transition(state, message, newState ?: state)
+    private suspend fun sendTransition(state: State, message: Message, newState: State?, sideEffects: List<SideEffect>?, commands: List<Command>?) {
+        val transition = Transition(
+            state = state,
+            message = message,
+            updatedState = newState ?: state,
+            sideEffects = sideEffects.orEmpty(),
+            commands = commands.orEmpty()
+        )
         transitionSharedFlow.emit(transition)
     }
 }
