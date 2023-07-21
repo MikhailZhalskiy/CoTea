@@ -62,7 +62,6 @@ class MainCommandHandlerSwitchMap: CommandHandler<MainMessage, MainCommand> {
 
     private val commandSharedFlow = MutableSharedFlow<MainCommand>(Int.MAX_VALUE)
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     override fun getMessageSource(): Flow<MainMessage> {
         return merge(
             flatMapMergeMessageFlow(),
@@ -106,7 +105,7 @@ class MainCommandHandlerSwitchMap: CommandHandler<MainMessage, MainCommand> {
     private fun handleLoadOne(command: MainCommand): Flow<MainMessage> {
         return flow {
             println("handleLoadOne -> start")
-            Thread.sleep(5000)
+            delay(5000)
             val data = Random.nextInt(100)
             println("handleLoadOne -> emit($data)")
             emit(data)
@@ -120,8 +119,7 @@ class MainCommandHandlerSwitchMap: CommandHandler<MainMessage, MainCommand> {
     private fun handleLoadTwo(command: MainCommand): Flow<MainMessage> {
         return flow {
             println("handleLoadTwo -> start")
-//            delay(5000)
-            Thread.sleep(5000)
+            delay(5000)
             val data = Random.nextInt(100)
             println("handleLoadTwo -> emit($data)")
             emit(data)
