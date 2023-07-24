@@ -8,13 +8,10 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flatMapMerge
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
@@ -32,7 +29,7 @@ class MainCommandHandler: CommandHandlerDefault<MainMessage, MainCommand>() {
     private fun handleLoadOne(command: MainCommand): Flow<MainMessage> {
         return flow {
             println("handleLoadOne -> start")
-            Thread.sleep(5000)
+            delay(5000)
             val data = Random.nextInt(100)
             println("handleLoadOne -> pre emit($data)")
             emit(data)
@@ -46,7 +43,7 @@ class MainCommandHandler: CommandHandlerDefault<MainMessage, MainCommand>() {
     private fun handleLoadTwo(command: MainCommand): Flow<MainMessage> {
         return flow {
             println("handleLoadTwo -> start")
-            Thread.sleep(5000)
+            delay(5000)
             val data = Random.nextInt(100)
             println("handleLoadTwo -> pre emit($data)")
             emit(data)
@@ -62,7 +59,6 @@ class MainCommandHandlerSwitchMap: CommandHandler<MainMessage, MainCommand> {
 
     private val commandSharedFlow = MutableSharedFlow<MainCommand>(Int.MAX_VALUE)
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     override fun getMessageSource(): Flow<MainMessage> {
         return merge(
             flatMapMergeMessageFlow(),
@@ -106,7 +102,7 @@ class MainCommandHandlerSwitchMap: CommandHandler<MainMessage, MainCommand> {
     private fun handleLoadOne(command: MainCommand): Flow<MainMessage> {
         return flow {
             println("handleLoadOne -> start")
-            Thread.sleep(5000)
+            delay(5000)
             val data = Random.nextInt(100)
             println("handleLoadOne -> emit($data)")
             emit(data)
@@ -120,8 +116,7 @@ class MainCommandHandlerSwitchMap: CommandHandler<MainMessage, MainCommand> {
     private fun handleLoadTwo(command: MainCommand): Flow<MainMessage> {
         return flow {
             println("handleLoadTwo -> start")
-//            delay(5000)
-            Thread.sleep(5000)
+            delay(5000)
             val data = Random.nextInt(100)
             println("handleLoadTwo -> emit($data)")
             emit(data)
