@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.scan
  * Если состояние не изменилось или в результате реакции на событие не было создано никаких сайд-эффектов
  * и/или команд то соостветвующие источники ничего не излучают.
  *
+ * @property messageSharedFlow наблюдаемый источник входящик событий
  * @property sideEffectsSharedFlow наблюдаемый источник излучаемых сайд-эффектов
  * @property commandsSharedFlow наблюдаемый источник излучаемых команд
  * @property transitionSharedFlow наблюдаемый источник излучаемых [Transition]
@@ -32,12 +33,17 @@ class StateMachine<Message, State, SideEffect, Command>(
     private val initialState: State,
 ) {
 
-    private val commandsSharedFlow = MutableSharedFlow<List<Command>>()
-    private val sideEffectsSharedFlow = MutableSharedFlow<List<SideEffect>>()
+    private val messageSharedFlow = MutableSharedFlow<Message>(extraBufferCapacity = Int.MAX_VALUE)
+    private val commandsSharedFlow = MutableSharedFlow<List<Command>>(extraBufferCapacity = Int.MAX_VALUE)
+    private val sideEffectsSharedFlow = MutableSharedFlow<List<SideEffect>>(extraBufferCapacity = Int.MAX_VALUE)
     private val transitionSharedFlow = MutableSharedFlow<Transition<Message, State, SideEffect, Command>>(extraBufferCapacity = Int.MAX_VALUE)
 
-    fun getStateSource(messageSource: Flow<Message>): Flow<State> {
-        return messageSource.scan(initialState) { state, message ->
+    suspend fun onMessage(message: Message) {
+        messageSharedFlow.emit(message)
+    }
+
+    fun getStateSource(): Flow<State> {
+        return messageSharedFlow.scan(initialState) { state, message ->
             val (updatedState, sideEffects, commands) = stateUpdater.update(state, message)
             commands?.let { commandsSharedFlow.emit(it) }
             sideEffects?.let { sideEffectsSharedFlow.emit(it) }
