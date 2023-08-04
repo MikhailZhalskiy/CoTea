@@ -11,6 +11,12 @@ java {
 
 dependencies {
     implementation(libs.coroutines)
+
+    testImplementation(libs.junit)
+    testImplementation(libs.test.kotlin)
+    testImplementation(libs.test.coroutines)
+    testImplementation(libs.test.mockk)
+    testImplementation(libs.test.turbine)
 }
 
 publishing {
