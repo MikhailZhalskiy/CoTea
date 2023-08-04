@@ -2,6 +2,8 @@ package com.mw.cotea_core.state_machine
 
 import com.mw.cotea_core.state_updater.StateUpdater
 import com.mw.cotea_core.transition.Transition
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -9,6 +11,7 @@ import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapMerge
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.scan
 
 /**
@@ -31,6 +34,7 @@ import kotlinx.coroutines.flow.scan
 class StateMachine<Message, State, SideEffect, Command>(
     private val stateUpdater: StateUpdater<Message, State, SideEffect, Command>,
     private val initialState: State,
+    private val dispatcherDefault: CoroutineDispatcher = Dispatchers.Default
 ) {
 
     private val messageSharedFlow = MutableSharedFlow<Message>(extraBufferCapacity = Int.MAX_VALUE)
@@ -51,6 +55,7 @@ class StateMachine<Message, State, SideEffect, Command>(
             updatedState ?: state
         }
             .distinctUntilChanged { oldState, newState -> oldState === newState }
+            .flowOn(dispatcherDefault)
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)

@@ -16,6 +16,8 @@ import com.mw.cotea_core.state_updater.Update
 import com.mw.cotea_core.transition.Transition
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -32,12 +34,14 @@ internal class StateMachineTest {
 
     private var lazyStateMachine by Delegates.notNull<Lazy<StateMachine<Message, State, SideEffect, Command>>>()
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Before
     fun setUp() {
         lazyStateMachine = lazy {
             StateMachine<Message, State, SideEffect, Command>(
                 stateUpdater = stateUpdater,
-                initialState = INITIAL_STATE
+                initialState = INITIAL_STATE,
+                dispatcherDefault = UnconfinedTestDispatcher()
             )
         }
     }
