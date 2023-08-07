@@ -9,13 +9,12 @@ import com.mw.cotea_core.data.State
 import com.mw.cotea_core.state_machine.StateMachine
 import com.mw.cotea_core.transition.TransitionListener
 import io.mockk.coVerify
+import io.mockk.coVerifyOrder
 import io.mockk.mockk
-import io.mockk.verify
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
-import kotlin.properties.Delegates
 
 internal class StoreImplTest {
 
@@ -24,50 +23,37 @@ internal class StoreImplTest {
     private val initialCommands = listOf(INITIAL_COMMAND)
     private val transitionListener: TransitionListener<Message, State, SideEffect, Command> = mockk(relaxed = true)
 
-    private val storeImpl: StoreImpl<Message, State, SideEffect, Command>
-        get() = lazyStoreImpl.value
-
-    private var lazyStoreImpl by Delegates.notNull<Lazy<StoreImpl<Message, State, SideEffect, Command>>>()
+    private lateinit var storeImpl: StoreImpl<Message, State, SideEffect, Command>
 
     @Before
     fun setUp() {
-        lazyStoreImpl = lazy {
-            StoreImpl<Message, State, SideEffect, Command>(
-                stateMachine = stateMachine,
-                commandHandler = commandHandler,
-                initialCommands = initialCommands,
-                transitionListener = transitionListener
-            )
+        storeImpl = StoreImpl(
+            stateMachine = stateMachine,
+            commandHandler = commandHandler,
+            initialCommands = initialCommands,
+            transitionListener = transitionListener
+        )
+    }
+
+    @Test
+    fun `when call start then fun stateMachine_emitInitialCommands is called after all source initialization`() =
+        runBlocking(Dispatchers.IO) {
+            storeImpl.start(this, {}, {})
+            coVerifyOrder {
+                stateMachine.getTransitionSource()
+                stateMachine.emitInitialCommands(any())
+            }
+            coVerifyOrder {
+                stateMachine.getSideEffectSource()
+                stateMachine.emitInitialCommands(any())
+            }
+            coVerifyOrder {
+                stateMachine.getCommandSource()
+                stateMachine.emitInitialCommands(any())
+            }
+            coVerify {
+                stateMachine.getStateSource()
+                stateMachine.emitInitialCommands(any())
+            }
         }
-    }
-
-    @Test
-    fun `when execute fun start then execute fun stateMachine_emitInitialCommands`() = runBlocking {
-        storeImpl.start(this, {}, {})
-        coVerify { stateMachine.emitInitialCommands(any()) }
-    }
-
-    @Test
-    fun `when execute fun start then execute fun stateMachine_getStateSource`() = runTest {
-        storeImpl.start(this, {}, {})
-        verify { stateMachine.getStateSource() }
-    }
-
-    @Test
-    fun `when execute fun start then execute fun stateMachine_getSideEffectSource`() = runTest {
-        storeImpl.start(this, {}, {})
-        verify { stateMachine.getSideEffectSource() }
-    }
-
-    @Test
-    fun `when execute fun start then execute fun stateMachine_getCommandSource`() = runTest {
-        storeImpl.start(this, {}, {})
-        verify { stateMachine.getCommandSource() }
-    }
-
-    @Test
-    fun `when execute fun start then execute fun stateMachine_getTransitionSource`() = runTest {
-        storeImpl.start(this, {}, {})
-        verify { stateMachine.getTransitionSource() }
-    }
 }
