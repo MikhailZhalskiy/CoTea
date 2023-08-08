@@ -24,7 +24,7 @@ internal class StoreImpl<Message, State, SideEffect, Command>(
     private val commandMessageSourceStarted = CompletableDeferred<Unit>()
 
     override suspend fun onMessage(message: Message) {
-        stateSourceStarted.await()
+        stateSourceStarted.join()
         stateMachine.onMessage(message)
     }
 
@@ -73,11 +73,11 @@ internal class StoreImpl<Message, State, SideEffect, Command>(
             .launchIn(coroutineScope)
 
         coroutineScope.launch {
-            transitionSourceStarted.await()
-            sideEffectSourceStarted.await()
-            commandMessageSourceStarted.await()
-            commandSourceStarted.await()
-            stateSourceStarted.await()
+            transitionSourceStarted.join()
+            sideEffectSourceStarted.join()
+            commandMessageSourceStarted.join()
+            commandSourceStarted.join()
+            stateSourceStarted.join()
             stateMachine.emitInitialCommands(initialCommands)
         }
     }
