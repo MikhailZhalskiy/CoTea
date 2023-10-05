@@ -4,10 +4,8 @@ import com.mw.cotea.Resource
 
 
 sealed interface MainMessage {
-
-    object OneClick : MainMessage
-    object TwoClick : MainMessage
-
-    data class LoadedOneClick(val one: Resource<Int>) : MainMessage
-    data class LoadedTwoClick(val two: Resource<Int>) : MainMessage
+    data class OnInputText(val value: String) : MainMessage
+    data class LoadedText(val value: Resource<List<String>>) : MainMessage
+    object OnLoadDataClick : MainMessage
+    data class LoadedData(val value: Resource<Int>) : MainMessage
 }

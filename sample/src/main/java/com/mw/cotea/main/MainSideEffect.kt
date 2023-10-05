@@ -1,3 +1,5 @@
 package com.mw.cotea.main
 
-sealed interface MainSideEffect
+sealed interface MainSideEffect {
+    data class LoadedData(val value: Int): MainSideEffect
+}

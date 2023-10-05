@@ -2,10 +2,11 @@ package com.mw.cotea.main
 
 import com.mw.cotea_core.store.Store
 import com.mw.cotea_core.store.StoreFactory
+import kotlinx.coroutines.Dispatchers
 
 class MainFactory(
     private val stateUpdater: MainStateUpdater,
-    private val commandHandler: MainCommandHandlerSwitchMap,
+    private val commandHandler: MainCommandHandler,
     private val transitionListener: MainAnalytic
 ) {
 
@@ -17,7 +18,8 @@ class MainFactory(
             commandHandler = commandHandler,
             initialState = initialState(),
             initialCommands = emptyList(),
-            transitionListener = null//transitionListener
+            transitionListener = null,//transitionListener,
+            coroutineDispatcher = Dispatchers.Default
         )
     }
 }

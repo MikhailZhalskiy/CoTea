@@ -34,7 +34,7 @@ import kotlinx.coroutines.flow.scan
 class StateMachine<Message, State, SideEffect, Command>(
     private val stateUpdater: StateUpdater<Message, State, SideEffect, Command>,
     private val initialState: State,
-    private val dispatcherDefault: CoroutineDispatcher = Dispatchers.Default
+    private val coroutineDispatcher: CoroutineDispatcher = Dispatchers.Default
 ) {
 
     private val messageSharedFlow = MutableSharedFlow<Message>(extraBufferCapacity = Int.MAX_VALUE)
@@ -55,7 +55,7 @@ class StateMachine<Message, State, SideEffect, Command>(
             updatedState ?: state
         }
             .distinctUntilChanged { oldState, newState -> oldState === newState }
-            .flowOn(dispatcherDefault)
+            .flowOn(coroutineDispatcher)
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)

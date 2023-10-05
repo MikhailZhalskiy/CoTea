@@ -41,7 +41,7 @@ internal class StateMachineTest {
             StateMachine<Message, State, SideEffect, Command>(
                 stateUpdater = stateUpdater,
                 initialState = INITIAL_STATE,
-                dispatcherDefault = UnconfinedTestDispatcher()
+                coroutineDispatcher = UnconfinedTestDispatcher()
             )
         }
     }

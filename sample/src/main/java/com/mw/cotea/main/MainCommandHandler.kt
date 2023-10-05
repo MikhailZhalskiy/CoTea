@@ -2,128 +2,80 @@ package com.mw.cotea.main
 
 import com.mw.cotea.asResource
 import com.mw.cotea_core.command_handler.CommandHandler
-import com.mw.cotea_core.command_handler.CommandHandlerDefault
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flatMapMerge
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
-import kotlin.random.Random
 
-class MainCommandHandler: CommandHandlerDefault<MainMessage, MainCommand>() {
-
-    override suspend fun execute(command: MainCommand): Flow<MainMessage> {
-        return when (command) {
-            MainCommand.LoadOne -> handleLoadOne(command)
-            MainCommand.LoadTwo -> handleLoadTwo(command)
-        }
-    }
-
-    private fun handleLoadOne(command: MainCommand): Flow<MainMessage> {
-        return flow {
-            println("handleLoadOne -> start")
-            delay(5000)
-            val data = Random.nextInt(100)
-            println("handleLoadOne -> pre emit($data)")
-            emit(data)
-            println("handleLoadOne -> end")
-        }
-            .flowOn(Dispatchers.IO)
-            .asResource()
-            .map(MainMessage::LoadedOneClick)
-    }
-
-    private fun handleLoadTwo(command: MainCommand): Flow<MainMessage> {
-        return flow {
-            println("handleLoadTwo -> start")
-            delay(5000)
-            val data = Random.nextInt(100)
-            println("handleLoadTwo -> pre emit($data)")
-            emit(data)
-            println("handleLoadTwo -> end")
-        }
-            .flowOn(Dispatchers.IO)
-            .asResource()
-            .map(MainMessage::LoadedTwoClick)
-    }
-}
-
-class MainCommandHandlerSwitchMap: CommandHandler<MainMessage, MainCommand> {
+class MainCommandHandler: CommandHandler<MainMessage, MainCommand> {
 
     private val commandSharedFlow = MutableSharedFlow<MainCommand>(Int.MAX_VALUE)
+
+    override suspend fun onCommand(command: MainCommand) {
+        commandSharedFlow.emit(command)
+    }
 
     override fun getMessageSource(): Flow<MainMessage> {
         return merge(
             flatMapMergeMessageFlow(),
-            flatMapLatestMessageFlow()
+            loadTextMessageFlow()
         )
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun flatMapMergeMessageFlow(): Flow<MainMessage> {
         return commandSharedFlow
-//            .filter { command ->
-//                command is MainCommand.LoadOne
-//            }
             .flatMapMerge{command ->
                 when (command) {
-                    MainCommand.LoadOne -> handleLoadOne(command)
+                    is MainCommand.LoadData -> handleLoadData(command)
                     else -> emptyFlow()
                 }
             }
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    private fun flatMapLatestMessageFlow(): Flow<MainMessage> {
+    private fun loadTextMessageFlow(): Flow<MainMessage> {
         return commandSharedFlow
-//            .filter { command ->
-//                command is MainCommand.LoadTwo
-//            }
-            .flatMapLatest{command ->
-                when (command) {
-                    MainCommand.LoadTwo -> handleLoadTwo(command)
-                    else -> emptyFlow()
-                }
-            }
+            .filterIsInstance<MainCommand.LoadText>()
+            .flatMapLatest(::handleLoadText)
             .flowOn(Dispatchers.IO)
     }
 
-    override suspend fun onCommand(command: MainCommand) {
-        commandSharedFlow.emit(command)
-    }
-
-    private fun handleLoadOne(command: MainCommand): Flow<MainMessage> {
+    private fun handleLoadData(command: MainCommand.LoadData): Flow<MainMessage> {
         return flow {
-            println("handleLoadOne -> start")
-            delay(5000)
-            val data = Random.nextInt(100)
-            println("handleLoadOne -> emit($data)")
+            println("handleLoadData -> start")
+            delay(2000)
+            val data = command.value
+            println("handleLoadData -> emit($data)")
             emit(data)
-            println("handleLoadOne -> end")
+            println("handleLoadData -> end")
         }
-            .flowOn(Dispatchers.IO)
             .asResource()
-            .map(MainMessage::LoadedOneClick)
+            .map(MainMessage::LoadedData)
+            .flowOn(Dispatchers.IO)
     }
 
-    private fun handleLoadTwo(command: MainCommand): Flow<MainMessage> {
+    private fun handleLoadText(command: MainCommand.LoadText): Flow<MainMessage> {
         return flow {
-            println("handleLoadTwo -> start")
-            delay(5000)
-            val data = Random.nextInt(100)
-            println("handleLoadTwo -> emit($data)")
+            println("handleLoadText -> start")
+            delay(3000)
+            val data = command.value.map { it.toString() }
+            if (data.size > 5) throw RuntimeException("data.size > 5")
+            println("handleLoadText -> emit($data)")
             emit(data)
-            println("handleLoadTwo -> end")
+            println("handleLoadText -> end")
         }
-            .flowOn(Dispatchers.IO)
             .asResource()
-            .map(MainMessage::LoadedTwoClick)
+            .map(MainMessage::LoadedText)
+            .flowOn(Dispatchers.IO)
     }
 }

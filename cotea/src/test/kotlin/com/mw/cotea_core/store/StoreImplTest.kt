@@ -11,18 +11,23 @@ import com.mw.cotea_core.transition.TransitionListener
 import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.verify
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import kotlin.properties.Delegates
 
+@OptIn(ExperimentalCoroutinesApi::class)
 internal class StoreImplTest {
 
     private val stateMachine: StateMachine<Message, State, SideEffect, Command> = mockk(relaxed = true)
     private val commandHandler: CommandHandler<Message, Command> = mockk(relaxed = true)
     private val initialCommands = listOf(INITIAL_COMMAND)
     private val transitionListener: TransitionListener<Message, State, SideEffect, Command> = mockk(relaxed = true)
+    private val coroutineExceptionHandler = CoroutineExceptionHandler { _, _ ->  }
 
     private val storeImpl: StoreImpl<Message, State, SideEffect, Command>
         get() = lazyStoreImpl.value
@@ -43,31 +48,51 @@ internal class StoreImplTest {
 
     @Test
     fun `when execute fun start then execute fun stateMachine_emitInitialCommands`() = runBlocking {
-        storeImpl.start(this, {}, {})
+        storeImpl.start(
+            this,
+            coroutineDispatcher = UnconfinedTestDispatcher(),
+            coroutineExceptionHandler = coroutineExceptionHandler,
+            actionState = {}) {}
         coVerify { stateMachine.emitInitialCommands(any()) }
     }
 
     @Test
     fun `when execute fun start then execute fun stateMachine_getStateSource`() = runTest {
-        storeImpl.start(this, {}, {})
+        storeImpl.start(
+            this,
+            coroutineDispatcher = UnconfinedTestDispatcher(),
+            coroutineExceptionHandler = coroutineExceptionHandler,
+            actionState = {}) {}
         verify { stateMachine.getStateSource() }
     }
 
     @Test
     fun `when execute fun start then execute fun stateMachine_getSideEffectSource`() = runTest {
-        storeImpl.start(this, {}, {})
+        storeImpl.start(
+            this,
+            coroutineDispatcher = UnconfinedTestDispatcher(),
+            coroutineExceptionHandler = coroutineExceptionHandler,
+            actionState = {}) {}
         verify { stateMachine.getSideEffectSource() }
     }
 
     @Test
     fun `when execute fun start then execute fun stateMachine_getCommandSource`() = runTest {
-        storeImpl.start(this, {}, {})
+        storeImpl.start(
+            this,
+            coroutineDispatcher = UnconfinedTestDispatcher(),
+            coroutineExceptionHandler = coroutineExceptionHandler,
+            actionState = {}) {}
         verify { stateMachine.getCommandSource() }
     }
 
     @Test
     fun `when execute fun start then execute fun stateMachine_getTransitionSource`() = runTest {
-        storeImpl.start(this, {}, {})
+        storeImpl.start(
+            this,
+            coroutineDispatcher = UnconfinedTestDispatcher(),
+            coroutineExceptionHandler = coroutineExceptionHandler,
+            actionState = {}) {}
         verify { stateMachine.getTransitionSource() }
     }
 }
