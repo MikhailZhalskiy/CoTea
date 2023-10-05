@@ -4,6 +4,8 @@ import com.mw.cotea_core.command_handler.CommandHandler
 import com.mw.cotea_core.state_machine.StateMachine
 import com.mw.cotea_core.transition.TransitionListener
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -30,55 +32,55 @@ internal class StoreImpl<Message, State, SideEffect, Command>(
 
     override fun start(
         coroutineScope: CoroutineScope,
+        coroutineDispatcher: CoroutineDispatcher,
+        coroutineExceptionHandler: CoroutineExceptionHandler,
         actionState: suspend (State) -> Unit,
-        actionSideEffect: suspend (SideEffect) -> Unit,
+        actionSideEffect: suspend (SideEffect) -> Unit
     ) {
-        if (transitionListener != null) {
-            stateMachine.getTransitionSource()
+        coroutineScope.launch(coroutineDispatcher + coroutineExceptionHandler) {
+            if (transitionListener != null) {
+                stateMachine.getTransitionSource()
+                    .onStart { transitionSourceStarted.complete(Unit) }
+                    .onEach(transitionListener::onTransition)
+//                    .flowOn(Dispatchers.Default)
+                    .launchIn(this)
+            } else {
+                transitionSourceStarted.complete(Unit)
+            }
+
+            stateMachine.getSideEffectSource()
+                .onStart { sideEffectSourceStarted.complete(Unit) }
+                .onEach(actionSideEffect)
+                .launchIn(this)
+
+            commandHandler.getMessageSource()
+                .onStart { commandMessageSourceStarted.complete(Unit) }
+//                .flowOn(Dispatchers.IO)
+                .onEach(stateMachine::onMessage)
+//                .flowOn(Dispatchers.Default)
+                .launchIn(this)
+
+            stateMachine.getCommandSource()
+                .onStart { commandSourceStarted.complete(Unit) }
+                .onEach(commandHandler::onCommand)
+//                .flowOn(Dispatchers.IO)
+                .launchIn(this)
+
+            stateMachine.getStateSource()
                 .onStart {
-                    transitionSourceStarted.complete(Unit)
+                    transitionSourceStarted.join()
+                    sideEffectSourceStarted.join()
+                    commandMessageSourceStarted.join()
+                    commandSourceStarted.join()
+                    stateSourceStarted.complete(Unit)
                 }
-                .onEach { transitionListener.onTransition(it) }
-                .launchIn(coroutineScope)
-        } else {
-            transitionSourceStarted.complete(Unit)
-        }
+                .onEach(actionState)
+                .launchIn(this)
 
-        stateMachine.getSideEffectSource()
-            .onStart {
-                sideEffectSourceStarted.complete(Unit)
+            launch(coroutineDispatcher) {
+                stateSourceStarted.join()
+                stateMachine.emitInitialCommands(initialCommands)
             }
-            .onEach(actionSideEffect)
-            .launchIn(coroutineScope)
-
-        commandHandler.getMessageSource()
-            .onStart {
-                commandMessageSourceStarted.complete(Unit)
-            }
-            .onEach(stateMachine::onMessage)
-            .launchIn(coroutineScope)
-
-        stateMachine.getCommandSource()
-            .onStart {
-                commandSourceStarted.complete(Unit)
-            }
-            .onEach(commandHandler::onCommand)
-            .launchIn(coroutineScope)
-
-        stateMachine.getStateSource()
-            .onStart {
-                transitionSourceStarted.join()
-                sideEffectSourceStarted.join()
-                commandMessageSourceStarted.join()
-                commandSourceStarted.join()
-                stateSourceStarted.complete(Unit)
-            }
-            .onEach(actionState)
-            .launchIn(coroutineScope)
-
-        coroutineScope.launch {
-            stateSourceStarted.join()
-            stateMachine.emitInitialCommands(initialCommands)
         }
     }
 }

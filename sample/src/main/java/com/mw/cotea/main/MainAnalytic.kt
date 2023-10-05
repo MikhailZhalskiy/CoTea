@@ -9,6 +9,8 @@ class MainAnalytic: TransitionListener<MainMessage, MainState, MainSideEffect, M
     override fun onTransition(transition: Transition<MainMessage, MainState, MainSideEffect, MainCommand>) {
         println("MainAnalytic state: ${transition.state}")
         println("MainAnalytic message: ${transition.message}")
-        println("MainAnalytic newState: ${transition.updatedState}")
+        println("MainAnalytic updatedState: ${transition.updatedState}")
+        println("MainAnalytic commands: ${transition.commands}")
+        println("MainAnalytic sideEffects: ${transition.sideEffects}")
     }
 }

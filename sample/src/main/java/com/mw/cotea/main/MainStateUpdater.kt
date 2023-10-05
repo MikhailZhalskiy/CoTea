@@ -1,5 +1,6 @@
 package com.mw.cotea.main
 
+import com.mw.cotea.Resource
 import com.mw.cotea_core.state_updater.StateUpdater
 import com.mw.cotea_core.state_updater.Update
 
@@ -10,46 +11,46 @@ class MainStateUpdater: StateUpdater<MainMessage, MainState, MainSideEffect, Mai
         message: MainMessage
     ): Update<MainState, MainSideEffect, MainCommand> {
         return when(message) {
-            is MainMessage.OneClick -> reduceOneClick(state, message)
-            is MainMessage.TwoClick -> reduceTwoClick(state, message)
-            is MainMessage.LoadedOneClick -> reduceLoadedOneClick(state, message)
-            is MainMessage.LoadedTwoClick -> reduceLoadedTwoClick(state, message)
+            is MainMessage.OnInputText -> updateOnInputText(state, message)
+            is MainMessage.LoadedText -> updateLoadedText(state, message)
+            is MainMessage.OnLoadDataClick -> updateOnLoadDataClick(state, message)
+            is MainMessage.LoadedData -> updateLoadedData(state, message)
         }
     }
 
-    private fun reduceOneClick(
+    private fun updateOnInputText(
         state: MainState,
-        message: MainMessage.OneClick
+        message: MainMessage.OnInputText
     ): Update<MainState, MainSideEffect, MainCommand> {
         return Update.stateWithSideEffectsWithCommands(
-            state = state.copy(countOneClick = state.countOneClick + 1),
-            commands = listOf(MainCommand.LoadOne)
+            state.copy(inputText = message.value),
+            commands = listOf(MainCommand.LoadText(message.value))
         )
     }
 
-    private fun reduceTwoClick(
+    private fun updateLoadedText(
         state: MainState,
-        message: MainMessage.TwoClick
+        message: MainMessage.LoadedText
     ): Update<MainState, MainSideEffect, MainCommand> {
+        return Update.state(state.copy(words = message.value))
+    }
+
+    private fun updateOnLoadDataClick(
+        state: MainState,
+        message: MainMessage.OnLoadDataClick
+    ): Update<MainState, MainSideEffect, MainCommand> {
+        val value: Int = if (state.words is Resource.Data) state.words.value.size else 0
+        return Update.commands(MainCommand.LoadData(value))
+    }
+
+    private fun updateLoadedData(
+        state: MainState,
+        message: MainMessage.LoadedData
+    ): Update<MainState, MainSideEffect, MainCommand> {
+        val sideEffect = if (message.value is Resource.Data) MainSideEffect.LoadedData(message.value.value) else null
         return Update.stateWithSideEffectsWithCommands(
-            state = state.copy(countTwoClick = state.countTwoClick + 1),
-            commands = listOf(MainCommand.LoadTwo)
+            state.copy(loadData = message.value),
+            sideEffects = sideEffect?.let { listOf(it) }
         )
     }
-
-    private fun reduceLoadedOneClick(
-        state: MainState,
-        message: MainMessage.LoadedOneClick
-    ): Update<MainState, MainSideEffect, MainCommand> {
-        return Update.state(state.copy(one = message.one))
-    }
-
-    private fun reduceLoadedTwoClick(
-        state: MainState,
-        message: MainMessage.LoadedTwoClick
-    ): Update<MainState, MainSideEffect, MainCommand> {
-        return Update.state(state.copy(two = message.two))
-    }
-
-
 }

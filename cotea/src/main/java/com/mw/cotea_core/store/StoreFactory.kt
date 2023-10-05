@@ -4,6 +4,8 @@ import com.mw.cotea_core.command_handler.CommandHandler
 import com.mw.cotea_core.state_machine.StateMachine
 import com.mw.cotea_core.state_updater.StateUpdater
 import com.mw.cotea_core.transition.TransitionListener
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 
 /**
  * Фабрика для создания [Store]
@@ -34,11 +36,13 @@ object StoreFactory {
         commandHandler: CommandHandler<Message, Command>,
         initialState: State,
         initialCommands: List<Command>,
-        transitionListener: TransitionListener<Message, State, SideEffect, Command>? = null
+        transitionListener: TransitionListener<Message, State, SideEffect, Command>? = null,
+        coroutineDispatcher: CoroutineDispatcher = Dispatchers.Default
     ): Store<Message, State, SideEffect, Command> {
         val stateMachine: StateMachine<Message, State, SideEffect, Command> = StateMachine(
             stateUpdater,
             initialState,
+            coroutineDispatcher
         )
 
         return StoreImpl(

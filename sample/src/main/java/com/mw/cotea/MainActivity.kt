@@ -12,7 +12,7 @@ import com.mw.cotea.ui.theme.CoTeaTheme
 
 class MainActivity : ComponentActivity() {
 
-    val viewModel: MainActivityViewModel by viewModels()
+    private val viewModel: MainActivityViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

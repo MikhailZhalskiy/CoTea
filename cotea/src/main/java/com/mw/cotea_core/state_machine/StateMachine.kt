@@ -18,7 +18,7 @@ import kotlinx.coroutines.flow.scan
  * Стейт-машина связывающая логику [StateUpdater] и передачу данных по каналам
  * для команд и сайд-эффектов и нового состояния [State].
  *
- * Реагирует на внешние события [Message] приходящие через [messageSource] в методе [getStateSource],
+ * Реагирует на внешние события [Message] приходящие в метод [onMessage],
  * результатом реакции на событие будет новое состояние проброшенное дальше по flow
  * набор сайд-эффектов брошенных в [sideEffectsSharedFlow].
  * набор команд брошенных в [commandsSharedFlow].
@@ -34,7 +34,7 @@ import kotlinx.coroutines.flow.scan
 class StateMachine<Message, State, SideEffect, Command>(
     private val stateUpdater: StateUpdater<Message, State, SideEffect, Command>,
     private val initialState: State,
-    private val dispatcherDefault: CoroutineDispatcher = Dispatchers.Default
+    private val coroutineDispatcher: CoroutineDispatcher = Dispatchers.Default
 ) {
 
     private val messageSharedFlow = MutableSharedFlow<Message>(extraBufferCapacity = Int.MAX_VALUE)
@@ -55,7 +55,7 @@ class StateMachine<Message, State, SideEffect, Command>(
             updatedState ?: state
         }
             .distinctUntilChanged { oldState, newState -> oldState === newState }
-            .flowOn(dispatcherDefault)
+            .flowOn(coroutineDispatcher)
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)

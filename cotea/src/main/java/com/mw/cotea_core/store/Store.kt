@@ -1,6 +1,9 @@
 package com.mw.cotea_core.store
 
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 
 /**
  * Обобщенная логика над стейт-машиной [com.mw.cotea_core.state_machine.StateMachine]
@@ -16,6 +19,8 @@ interface Store<Message, State, SideEffect, Command>{
 
     fun start(
         coroutineScope: CoroutineScope,
+        coroutineDispatcher: CoroutineDispatcher = Dispatchers.IO,
+        coroutineExceptionHandler: CoroutineExceptionHandler,
         actionState: suspend (State) -> Unit,
         actionSideEffect: suspend (SideEffect) -> Unit,
     )
