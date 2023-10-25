@@ -17,7 +17,7 @@ internal class StoreImpl<Message, State, SideEffect, Command>(
     private val commandHandler: CommandHandler<Message, Command>,
     private val initialCommands: List<Command>,
     private val transitionListener: TransitionListener<Message, State, SideEffect, Command>? = null
-): Store<Message, State, SideEffect, Command> {
+) : Store<Message, State, SideEffect, Command> {
 
     private val transitionSourceStarted = CompletableDeferred<Unit>()
     private val stateSourceStarted = CompletableDeferred<Unit>()
@@ -39,8 +39,9 @@ internal class StoreImpl<Message, State, SideEffect, Command>(
     ) {
         coroutineScope.launch(coroutineDispatcher + coroutineExceptionHandler) {
             if (transitionListener != null) {
-                stateMachine.getTransitionSource()
-                    .onStart { transitionSourceStarted.complete(Unit) }
+                stateMachine.getTransitionSource {
+                    transitionSourceStarted.complete(Unit)
+                }
                     .onEach(transitionListener::onTransition)
 //                    .flowOn(Dispatchers.Default)
                     .launchIn(this)
@@ -48,39 +49,40 @@ internal class StoreImpl<Message, State, SideEffect, Command>(
                 transitionSourceStarted.complete(Unit)
             }
 
-            stateMachine.getSideEffectSource()
-                .onStart { sideEffectSourceStarted.complete(Unit) }
+            stateMachine.getSideEffectSource {
+                sideEffectSourceStarted.complete(Unit)
+            }
                 .onEach(actionSideEffect)
                 .launchIn(this)
 
             commandHandler.getMessageSource()
-                .onStart { commandMessageSourceStarted.complete(Unit) }
+                .onStart {
+                    commandMessageSourceStarted.complete(Unit)
+                }
 //                .flowOn(Dispatchers.IO)
                 .onEach(stateMachine::onMessage)
 //                .flowOn(Dispatchers.Default)
                 .launchIn(this)
 
-            stateMachine.getCommandSource()
-                .onStart { commandSourceStarted.complete(Unit) }
+            stateMachine.getCommandSource {
+                commandSourceStarted.complete(Unit)
+            }
                 .onEach(commandHandler::onCommand)
 //                .flowOn(Dispatchers.IO)
                 .launchIn(this)
 
-            stateMachine.getStateSource()
-                .onStart {
-                    transitionSourceStarted.join()
-                    sideEffectSourceStarted.join()
-                    commandMessageSourceStarted.join()
-                    commandSourceStarted.join()
-                    stateSourceStarted.complete(Unit)
-                }
+            stateMachine.getStateSource {
+                transitionSourceStarted.join()
+                sideEffectSourceStarted.join()
+                commandMessageSourceStarted.join()
+                commandSourceStarted.join()
+                stateSourceStarted.complete(Unit)
+            }
                 .onEach(actionState)
                 .launchIn(this)
 
-            launch(coroutineDispatcher) {
-                stateSourceStarted.join()
-                stateMachine.emitInitialCommands(initialCommands)
-            }
+            stateSourceStarted.join()
+            stateMachine.emitInitialCommands(initialCommands)
         }
     }
 }

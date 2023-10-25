@@ -10,14 +10,17 @@ import com.mw.cotea.main.MainFactory
 import com.mw.cotea.main.MainMessage
 import com.mw.cotea.main.MainSideEffect
 import com.mw.cotea.main.MainState
-import com.mw.cotea.main.MainStateUpdater
+import com.mw.cotea.main.MainStateUpdaterDsl
 import com.mw.cotea.main.MainViewState
+import com.mw.cotea.util.ExactlyOnceEventBus
+import com.mw.cotea.util.SingleShotEvent
+import com.mw.cotea.util.throttleFirst
 import com.mw.cotea_core.store.Store
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flowOn
@@ -27,7 +30,7 @@ import kotlinx.coroutines.launch
 
 class MainActivityViewModel(
     private val mainFactory: MainFactory = MainFactory(
-        stateUpdater = MainStateUpdater(),
+        stateUpdater = MainStateUpdaterDsl(),
         commandHandler = MainCommandHandler(),
         transitionListener = MainAnalytic()
     ),
@@ -37,8 +40,12 @@ class MainActivityViewModel(
     private val _mainViewState = MutableStateFlow(MainViewState())
     val mainViewState = _mainViewState.asStateFlow()
 
-    private val _mainSideEffect = MutableSharedFlow<MainSideEffect>()
-    val mainSideEffect = _mainSideEffect.asSharedFlow()
+    // пример отправки сайд эффектов
+    private val _mainSideEffect = SingleShotEvent<MainSideEffect>()
+    val mainSideEffect = _mainSideEffect.events
+
+    // пример отправки сайд эффектов предложенный Романом Елизаровым
+    val exactlyOnceEventBus = ExactlyOnceEventBus<MainSideEffect>()
 
     private val uiMessage = MutableSharedFlow<MainMessage>()
     private val uiMessageOnInputText = MutableSharedFlow<MainMessage.OnInputText>()
@@ -57,9 +64,10 @@ class MainActivityViewModel(
         viewModelScope.launch(Dispatchers.Default) { uiMessage.emit(MainMessage.OnLoadDataClick) }
     }
 
+    @OptIn(FlowPreview::class)
     private fun collectUiEvent() {
         val coroutineExceptionHandler = CoroutineExceptionHandler { coroutineContext, throwable ->
-            Log.d(TAG, "coroutineContext = $coroutineContext : throwable = $throwable")
+            Log.d("COTEA", "coroutineContext = $coroutineContext : throwable = $throwable")
         }
 
         store.start(
@@ -70,7 +78,10 @@ class MainActivityViewModel(
                     mainConvertor.toMainViewState(mainState)
                 )
             },
-            actionSideEffect = _mainSideEffect::emit
+            actionSideEffect = { sideEffect ->
+                _mainSideEffect.postEvent(sideEffect)
+//                exactlyOnceEventBus.send(sideEffect)
+            }
         )
 
         uiMessageOnInputText
@@ -85,9 +96,4 @@ class MainActivityViewModel(
             .flowOn(Dispatchers.Default)
             .launchIn(viewModelScope)
     }
-
-    companion object {
-        private const val TAG = "COTEA"
-    }
 }
-

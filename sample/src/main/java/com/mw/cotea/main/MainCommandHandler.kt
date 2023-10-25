@@ -1,6 +1,7 @@
 package com.mw.cotea.main
 
-import com.mw.cotea.asResource
+import android.util.Log
+import com.mw.cotea.util.asResource
 import com.mw.cotea_core.command_handler.CommandHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -16,7 +17,9 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 
-class MainCommandHandler: CommandHandler<MainMessage, MainCommand> {
+class MainCommandHandler(
+    private val emulationSocket: EmulationSocket = EmulationSocket(),
+): CommandHandler<MainMessage, MainCommand> {
 
     private val commandSharedFlow = MutableSharedFlow<MainCommand>(Int.MAX_VALUE)
 
@@ -27,7 +30,8 @@ class MainCommandHandler: CommandHandler<MainMessage, MainCommand> {
     override fun getMessageSource(): Flow<MainMessage> {
         return merge(
             flatMapMergeMessageFlow(),
-            loadTextMessageFlow()
+            loadTextMessageFlow(),
+            getSocketFlow()
         )
     }
 
@@ -37,6 +41,8 @@ class MainCommandHandler: CommandHandler<MainMessage, MainCommand> {
             .flatMapMerge{command ->
                 when (command) {
                     is MainCommand.LoadData -> handleLoadData(command)
+                    is MainCommand.StartSocket -> handleStartSocket(command)
+                    is MainCommand.StopSocket -> handleStopSocket(command)
                     else -> emptyFlow()
                 }
             }
@@ -52,12 +58,12 @@ class MainCommandHandler: CommandHandler<MainMessage, MainCommand> {
 
     private fun handleLoadData(command: MainCommand.LoadData): Flow<MainMessage> {
         return flow {
-            println("handleLoadData -> start")
+            Log.d("COTEA", "handleLoadData -> start")
             delay(2000)
             val data = command.value
-            println("handleLoadData -> emit($data)")
+            Log.d("COTEA","handleLoadData -> emit($data)")
             emit(data)
-            println("handleLoadData -> end")
+            Log.d("COTEA","handleLoadData -> end")
         }
             .asResource()
             .map(MainMessage::LoadedData)
@@ -66,16 +72,32 @@ class MainCommandHandler: CommandHandler<MainMessage, MainCommand> {
 
     private fun handleLoadText(command: MainCommand.LoadText): Flow<MainMessage> {
         return flow {
-            println("handleLoadText -> start")
+            Log.d("COTEA","handleLoadText -> start")
             delay(3000)
             val data = command.value.map { it.toString() }
             if (data.size > 5) throw RuntimeException("data.size > 5")
-            println("handleLoadText -> emit($data)")
+            Log.d("COTEA","handleLoadText -> emit($data)")
             emit(data)
-            println("handleLoadText -> end")
+            Log.d("COTEA","handleLoadText -> end")
         }
             .asResource()
             .map(MainMessage::LoadedText)
             .flowOn(Dispatchers.IO)
+    }
+
+    private fun getSocketFlow(): Flow<MainMessage> {
+        return emulationSocket.getSocketFlow()
+            .map(MainMessage::SocketData)
+            .flowOn(Dispatchers.IO)
+    }
+
+    private fun handleStartSocket(command: MainCommand.StartSocket): Flow<MainMessage> {
+        emulationSocket.start()
+        return emptyFlow()
+    }
+
+    private fun handleStopSocket(command: MainCommand.StopSocket): Flow<MainMessage> {
+        emulationSocket.stop()
+        return emptyFlow()
     }
 }

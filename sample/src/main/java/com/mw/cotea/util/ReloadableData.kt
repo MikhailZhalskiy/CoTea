@@ -1,4 +1,4 @@
-package com.mw.cotea
+package com.mw.cotea.util
 
 data class ReloadableData<T>(val value: T?, val status: Status) {
     sealed class Status {

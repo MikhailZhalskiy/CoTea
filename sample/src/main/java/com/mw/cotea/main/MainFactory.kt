@@ -5,7 +5,7 @@ import com.mw.cotea_core.store.StoreFactory
 import kotlinx.coroutines.Dispatchers
 
 class MainFactory(
-    private val stateUpdater: MainStateUpdater,
+    private val stateUpdater: MainStateUpdaterDsl,
     private val commandHandler: MainCommandHandler,
     private val transitionListener: MainAnalytic
 ) {
@@ -17,7 +17,9 @@ class MainFactory(
             stateUpdater = stateUpdater,
             commandHandler = commandHandler,
             initialState = initialState(),
-            initialCommands = emptyList(),
+            initialCommands = listOf(
+                MainCommand.StartSocket
+            ),
             transitionListener = null,//transitionListener,
             coroutineDispatcher = Dispatchers.Default
         )

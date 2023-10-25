@@ -7,7 +7,7 @@ data class Command(val command: String)
 
 object DefaultModels{
     val INITIAL_STATE = State("initial_state")
-    val REDUCED_STATE = State("reduced_state")
+    val UPDATED_STATE = State("updated_state")
 
     val MESSAGE = Message("any_message")
 
