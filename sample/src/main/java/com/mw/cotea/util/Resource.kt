@@ -1,4 +1,4 @@
-package com.mw.cotea
+package com.mw.cotea.util
 
 import androidx.annotation.IntDef
 import kotlinx.coroutines.flow.Flow

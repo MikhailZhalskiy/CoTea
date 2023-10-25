@@ -1,5 +1,6 @@
 package com.mw.cotea
 
+import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -26,14 +27,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import com.mw.cotea.main.MainSideEffect
 import com.mw.cotea.main.MainViewState
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
@@ -53,7 +57,7 @@ fun MainScreen(viewModel: MainActivityViewModel) {
 @Composable
 fun MainView(
     mainViewState: MainViewState,
-    mainSideEffect: SharedFlow<MainSideEffect>,
+    mainSideEffect: Flow<MainSideEffect>,
     onValueChange: (String) -> Unit = {},
     onLoadDataClick: () -> Unit = {}
 ) {
@@ -61,15 +65,32 @@ fun MainView(
     val scope = rememberCoroutineScope()
     var inputText by remember { mutableStateOf("") }
 
-    LaunchedEffect(Unit) {
-        mainSideEffect
-            .onEach { sideEffect ->
-                scope.launch {
-                    snackbarHostState.showSnackbar(sideEffect.toString())
+
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
+    LaunchedEffect(lifecycle)  {
+        lifecycle.repeatOnLifecycle(state = Lifecycle.State.STARTED) {
+            mainSideEffect
+                .onEach { sideEffect ->
+                    Log.d("COTEA", "$sideEffect, ${this.coroutineContext}")
+                    scope.launch {
+                        snackbarHostState.showSnackbar(sideEffect.toString())
+                    }
                 }
-            }
-            .launchIn(this)
+                .collect()
+        }
     }
+
+//    LaunchedEffect(lifecycle) {
+//        lifecycle.repeatOnLifecycle(state = Lifecycle.State.STARTED) {
+//            while (isActive) {
+//                yield()
+//                Log.d("COTEA", "${viewModel.exactlyOnceEventBus.receive()}")
+//                scope.launch {
+//                    snackbarHostState.showSnackbar()
+//                }
+//            }
+//        }
+//    }
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },

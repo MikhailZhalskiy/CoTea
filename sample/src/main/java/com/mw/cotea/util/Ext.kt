@@ -1,4 +1,4 @@
-package com.mw.cotea
+package com.mw.cotea.util
 
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope

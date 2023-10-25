@@ -1,7 +1,6 @@
 package com.mw.cotea.main
 
-import com.mw.cotea.Resource
-
+import com.mw.cotea.util.Resource
 
 data class MainState(
     val inputText: String = "",

@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapMerge
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.onSubscription
 import kotlinx.coroutines.flow.scan
 
 /**
@@ -46,8 +47,10 @@ class StateMachine<Message, State, SideEffect, Command>(
         messageSharedFlow.emit(message)
     }
 
-    fun getStateSource(): Flow<State> {
-        return messageSharedFlow.scan(initialState) { state, message ->
+    fun getStateSource(onSubscription: suspend () -> Unit): Flow<State> {
+        return messageSharedFlow
+            .onSubscription { onSubscription() }
+            .scan(initialState) { state, message ->
             val (updatedState, sideEffects, commands) = stateUpdater.update(state, message)
             commands?.let { commandsSharedFlow.emit(it) }
             sideEffects?.let { sideEffectsSharedFlow.emit(it) }
@@ -59,19 +62,22 @@ class StateMachine<Message, State, SideEffect, Command>(
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    fun getSideEffectSource(): Flow<SideEffect> {
+    fun getSideEffectSource(onSubscription: () -> Unit): Flow<SideEffect> {
         return sideEffectsSharedFlow
+            .onSubscription { onSubscription() }
             .flatMapMerge { it.asFlow().cancellable() }
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    fun getCommandSource(): Flow<Command> {
+    fun getCommandSource(onSubscription: () -> Unit): Flow<Command> {
         return commandsSharedFlow
+            .onSubscription { onSubscription() }
             .flatMapMerge { it.asFlow().cancellable() }
     }
 
-    fun getTransitionSource(): Flow<Transition<Message, State, SideEffect, Command>> {
+    fun getTransitionSource(onSubscription: () -> Unit): Flow<Transition<Message, State, SideEffect, Command>> {
         return transitionSharedFlow
+            .onSubscription { onSubscription() }
     }
 
     suspend fun emitInitialCommands(initialCommands: List<Command>) {

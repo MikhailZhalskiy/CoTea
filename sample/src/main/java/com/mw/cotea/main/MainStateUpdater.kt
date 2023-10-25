@@ -1,6 +1,6 @@
 package com.mw.cotea.main
 
-import com.mw.cotea.Resource
+import com.mw.cotea.util.Resource
 import com.mw.cotea_core.state_updater.StateUpdater
 import com.mw.cotea_core.state_updater.Update
 
@@ -15,6 +15,7 @@ class MainStateUpdater: StateUpdater<MainMessage, MainState, MainSideEffect, Mai
             is MainMessage.LoadedText -> updateLoadedText(state, message)
             is MainMessage.OnLoadDataClick -> updateOnLoadDataClick(state, message)
             is MainMessage.LoadedData -> updateLoadedData(state, message)
+            is MainMessage.SocketData -> updateSocketData(state, message)
         }
     }
 
@@ -52,5 +53,12 @@ class MainStateUpdater: StateUpdater<MainMessage, MainState, MainSideEffect, Mai
             state.copy(loadData = message.value),
             sideEffects = sideEffect?.let { listOf(it) }
         )
+    }
+
+    private fun updateSocketData(
+        state: MainState,
+        message: MainMessage.SocketData
+    ): Update<MainState, MainSideEffect, MainCommand> {
+        return Update.sideEffects(MainSideEffect.SocketData(message.value))
     }
 }
