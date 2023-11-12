@@ -19,7 +19,7 @@ class MainStateUpdaterDsl: StateUpdaterDsl<MainMessage, MainState, MainSideEffec
         state: MainState,
         message: MainMessage.OnInputText
     ) {
-        updateSate { copy(inputText = message.value) }
+        updateState { copy(inputText = message.value) }
         command { MainCommand.LoadText(message.value) }
     }
 
@@ -27,7 +27,7 @@ class MainStateUpdaterDsl: StateUpdaterDsl<MainMessage, MainState, MainSideEffec
         state: MainState,
         message: MainMessage.LoadedText
     ) {
-        updateSate { copy(words = message.value) }
+        updateState { copy(words = message.value) }
     }
 
     private fun updateOnLoadDataClick(
@@ -46,7 +46,7 @@ class MainStateUpdaterDsl: StateUpdaterDsl<MainMessage, MainState, MainSideEffec
             sideEffect { MainSideEffect.LoadedData(message.value.value) }
         }
 
-        updateSate { copy(loadData = message.value) }
+        updateState { copy(loadData = message.value) }
     }
 
     private fun updateSocketData(

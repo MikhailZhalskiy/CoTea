@@ -25,7 +25,7 @@ abstract class StateUpdaterDsl<Message, State, SideEffect, Command> :
         commands += command()
     }
 
-    protected fun updateSate(newState: State.() -> State) {
+    protected fun updateState(newState: State.() -> State) {
         states += newState
     }
 
