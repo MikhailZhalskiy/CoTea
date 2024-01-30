@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
     alias(libs.plugins.kotlin.jvm)
     id("java-library")
@@ -5,8 +7,12 @@ plugins {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
+
+tasks.withType<KotlinCompile> {
+    kotlinOptions.jvmTarget = JavaVersion.VERSION_11.toString()
 }
 
 dependencies {
@@ -24,8 +30,6 @@ publishing {
         create<MavenPublication>("maven") {
             groupId = "com.github.MikhailZhalskiy"
             artifactId = "cotea"
-            version = "0.1"
-
             from(components["kotlin"])
         }
     }
