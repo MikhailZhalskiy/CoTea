@@ -2,7 +2,7 @@ package com.mw.cotea
 
 import com.mw.cotea.main.MainState
 import com.mw.cotea.main.MainViewState
-import com.mw.cotea.util.Resource
+import com.mw.ext.Resource
 
 class MainConvertor {
 

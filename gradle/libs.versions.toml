@@ -1,16 +1,13 @@
 # Versions
 #-----------------
 [versions]
-activityCompose = "1.8.0"
+activityCompose = "1.8.2"
 coreKtx = "1.12.0"
-espressoCore = "3.5.1"
 junit = "4.13.2"
-junitVersion = "1.1.5"
 kotlin = "1.9.10"
 coroutines = "1.7.1"
-lifecycleRuntimeCompose = "2.6.2"
+lifecycleRuntimeCompose = "2.7.0"
 mockk = "1.13.5"
-junit5 = "5.9.3"
 turbine = "1.0.0"
 
 #-----------------
@@ -23,7 +20,6 @@ core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
 coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
 lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycleRuntimeCompose" }
 # Test libraries
-#test-junit5 = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit5"}
 test-kotlin = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 test-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
 test-mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
