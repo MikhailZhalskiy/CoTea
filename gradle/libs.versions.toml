@@ -2,9 +2,11 @@
 #-----------------
 [versions]
 activityCompose = "1.8.2"
+composeBom = "2025.05.01"
+composeBomVersion = "2024.04.00"
 coreKtx = "1.12.0"
 junit = "4.13.2"
-kotlin = "1.9.10"
+kotlin = "2.1.21"
 coroutines = "1.7.1"
 lifecycleRuntimeCompose = "2.7.0"
 mockk = "1.13.5"
@@ -16,18 +18,29 @@ turbine = "1.0.0"
 [libraries]
 # Common libraries
 activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
+compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
+compose-bom-v20240400 = { module = "androidx.compose:compose-bom", version.ref = "composeBomVersion" }
 core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
 coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
 lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycleRuntimeCompose" }
 # Test libraries
+material3 = { module = "androidx.compose.material3:material3" }
 test-kotlin = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 test-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
 test-mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 test-turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine"}
 junit = { module = "junit:junit", version.ref = "junit" }
+ui = { module = "androidx.compose.ui:ui" }
+ui-graphics = { module = "androidx.compose.ui:ui-graphics" }
+ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4" }
+ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest" }
+ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
+ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
 
 #-----------------
 # Plugins
 #-----------------
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+org-jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
