@@ -1,17 +1,16 @@
 plugins {
-    id("com.android.application")
-    id("org.jetbrains.kotlin.android")
+    alias(libs.plugins.androidApplication)
+    alias(libs.plugins.kotlinAndroid)
     alias(libs.plugins.compose.compiler)
 }
 
 android {
     namespace = "com.mw.cotea"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.mw.cotea"
         minSdk = 24
-        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
@@ -30,18 +29,12 @@ android {
             )
         }
     }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
     buildFeatures {
         compose = true
     }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.3"
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
     packaging {
         resources {
@@ -63,7 +56,7 @@ dependencies {
     implementation(project(mapOf("path" to ":cotea")))
 
     testImplementation(libs.junit)
-    androidTestImplementation(platform(libs.compose.bom.v20240400))
+    androidTestImplementation(platform(libs.compose.bom))
     androidTestImplementation(libs.ui.test.junit4)
     debugImplementation(libs.ui.tooling)
     debugImplementation(libs.ui.test.manifest)
