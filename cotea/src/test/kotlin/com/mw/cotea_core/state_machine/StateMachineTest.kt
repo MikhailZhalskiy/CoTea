@@ -71,9 +71,11 @@ internal class StateMachineTest {
         every { stateUpdater.update(state = any(), message = MESSAGE) } returns Update.commands(COMMAND)
         turbineScope {
             val commandSource = stateMachine.getCommandSource({}).testIn(backgroundScope)
-            stateMachine.getStateSource({}).testIn(backgroundScope)
+            val stateSource = stateMachine.getStateSource({}).testIn(backgroundScope)
             stateMachine.onMessage(MESSAGE)
             assertEquals(COMMAND, commandSource.awaitItem())
+            commandSource.cancelAndIgnoreRemainingEvents()
+            stateSource.cancelAndIgnoreRemainingEvents()
         }
     }
 
@@ -82,9 +84,11 @@ internal class StateMachineTest {
         every { stateUpdater.update(state = any(), message = MESSAGE) } returns Update.sideEffects(SIDE_EFFECT)
         turbineScope {
             val sideEffectSource = stateMachine.getSideEffectSource({}).testIn(backgroundScope)
-            stateMachine.getStateSource({}).testIn(backgroundScope)
+            val stateSource = stateMachine.getStateSource({}).testIn(backgroundScope)
             stateMachine.onMessage(MESSAGE)
             assertEquals(SIDE_EFFECT, sideEffectSource.awaitItem())
+
+            stateSource.cancelAndIgnoreRemainingEvents()
         }
     }
 
@@ -114,9 +118,11 @@ internal class StateMachineTest {
         every { stateUpdater.update(state = INITIAL_STATE, message = MESSAGE) } returns Update.stateWithSideEffectsWithCommands(UPDATED_STATE, listOf(SIDE_EFFECT), listOf(COMMAND))
         turbineScope {
             val transitionSource = stateMachine.getTransitionSource({}).testIn(backgroundScope)
-            stateMachine.getStateSource({}).testIn(backgroundScope)
+            val stateSource = stateMachine.getStateSource({}).testIn(backgroundScope)
             stateMachine.onMessage(MESSAGE)
             assertEquals(Transition(INITIAL_STATE, MESSAGE, UPDATED_STATE, listOf(SIDE_EFFECT), listOf(COMMAND)), transitionSource.awaitItem())
+
+            stateSource.cancelAndIgnoreRemainingEvents()
         }
     }
 
@@ -125,9 +131,11 @@ internal class StateMachineTest {
         every { stateUpdater.update(state = INITIAL_STATE, message = MESSAGE) } returns Update.state(INITIAL_STATE)
         turbineScope {
             val transitionSource = stateMachine.getTransitionSource({}).testIn(backgroundScope)
-            stateMachine.getStateSource({}).testIn(backgroundScope)
+            val stateSource = stateMachine.getStateSource({}).testIn(backgroundScope)
             stateMachine.onMessage(MESSAGE)
             assertEquals(Transition(INITIAL_STATE, MESSAGE, INITIAL_STATE, listOf<SideEffect>(), listOf<Command>()), transitionSource.awaitItem())
+
+            stateSource.cancelAndIgnoreRemainingEvents()
         }
     }
 }

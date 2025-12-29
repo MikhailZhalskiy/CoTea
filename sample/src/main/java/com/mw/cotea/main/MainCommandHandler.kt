@@ -1,7 +1,7 @@
 package com.mw.cotea.main
 
 import android.util.Log
-import com.mw.cotea.util.asResource
+import com.mw.ext.asResource
 import com.mw.cotea_core.command_handler.CommandHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi

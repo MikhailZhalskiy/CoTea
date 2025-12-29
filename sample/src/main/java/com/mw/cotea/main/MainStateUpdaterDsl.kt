@@ -1,6 +1,6 @@
 package com.mw.cotea.main
 
-import com.mw.cotea.util.Resource
+import com.mw.ext.Resource
 import com.mw.cotea_core.state_updater.dsl.StateUpdaterDsl
 
 class MainStateUpdaterDsl: StateUpdaterDsl<MainMessage, MainState, MainSideEffect, MainCommand>() {
